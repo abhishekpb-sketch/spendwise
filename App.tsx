@@ -79,17 +79,26 @@ const App: React.FC = () => {
     useEffect(() => {
         if (!settings.enableReminders) return;
 
-        const checkReminder = () => {
+        const checkReminder = async () => {
             const now = new Date();
             const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
             if (currentTime === settings.reminderTime && now.getSeconds() < 10) {
                 const hasPending = expenses.some(e => e.isShared && !e.isSettled);
                 if (hasPending && Notification.permission === "granted") {
-                    new Notification("SpendWise Reminder", {
-                        body: "You have pending shared expenses to settle before the day ends!",
-                        icon: "https://cdn-icons-png.flaticon.com/512/5501/5501375.png"
-                    });
+                    try {
+                        const registration = await navigator.serviceWorker.ready;
+                        registration.showNotification("SpendWise Reminder", {
+                            body: "You have pending shared expenses to settle before the day ends!",
+                            icon: "https://cdn-icons-png.flaticon.com/512/5501/5501375.png"
+                        });
+                    } catch (e) {
+                        // Fallback for non-PWA environments
+                        new Notification("SpendWise Reminder", {
+                            body: "You have pending shared expenses to settle before the day ends!",
+                            icon: "https://cdn-icons-png.flaticon.com/512/5501/5501375.png"
+                        });
+                    }
                 }
             }
         };
