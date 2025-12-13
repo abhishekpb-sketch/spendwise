@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, NavLink } from 'react-router-dom';
-import { Home, Share2, Settings as SettingsIcon, Plus, X, Loader2 } from 'lucide-react';
+import { Home, Share2, Settings as SettingsIcon, Plus, X, Loader2, Pencil, Trash2 } from 'lucide-react';
 import Dashboard from './components/Dashboard';
 import SharedExpenses from './components/SharedExpenses';
 import Settings from './components/Settings';
@@ -18,6 +18,7 @@ const App: React.FC = () => {
         theme: 'light'
     });
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
 
     // Modal State
     const [description, setDescription] = useState('');
@@ -98,24 +99,57 @@ const App: React.FC = () => {
     }, [settings, expenses]);
 
 
-    const handleAddExpense = (e: React.FormEvent) => {
+
+    const handleSaveExpense = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!amount || !description) return;
 
-        const newExpense: Expense = {
-            id: crypto.randomUUID(),
-            amount: parseFloat(amount),
-            description,
-            category,
-            date: new Date(date).toISOString(),
-            isShared,
-            sharedNote: isShared ? sharedNote : undefined,
-            isSettled: false,
-            createdAt: Date.now()
-        };
+        if (editingExpense) {
+            const updatedExpense: Expense = {
+                ...editingExpense,
+                amount: parseFloat(amount),
+                description,
+                category,
+                date: new Date(date).toISOString(),
+                isShared,
+                sharedNote: isShared ? sharedNote : undefined,
+            };
 
-        setExpenses(prev => [newExpense, ...prev]);
+            await StorageService.updateExpense(updatedExpense);
+            setExpenses(prev => prev.map(e => e.id === updatedExpense.id ? updatedExpense : e));
+        } else {
+            const newExpense: Expense = {
+                id: crypto.randomUUID(),
+                amount: parseFloat(amount),
+                description,
+                category,
+                date: new Date(date).toISOString(),
+                isShared,
+                sharedNote: isShared ? sharedNote : undefined,
+                isSettled: false,
+                createdAt: Date.now()
+            };
+            setExpenses(prev => [newExpense, ...prev]);
+        }
         closeModal();
+    };
+
+    const handleEditExpense = (expense: Expense) => {
+        setEditingExpense(expense);
+        setDescription(expense.description);
+        setAmount(expense.amount.toString());
+        setCategory(expense.category);
+        setIsShared(expense.isShared);
+        setSharedNote(expense.sharedNote || '');
+        setDate(new Date(expense.date).toISOString().split('T')[0]);
+        setIsAddModalOpen(true);
+    };
+
+    const handleDeleteExpense = async (id: string) => {
+        if (confirm('Are you sure you want to delete this expense?')) {
+            await StorageService.deleteExpense(id);
+            setExpenses(prev => prev.filter(e => e.id !== id));
+        }
     };
 
     const handleSettle = (id: string) => {
@@ -132,6 +166,7 @@ const App: React.FC = () => {
 
     const closeModal = () => {
         setIsAddModalOpen(false);
+        setEditingExpense(null);
         setDescription('');
         setAmount('');
         setCategory(settings.categories[0] || 'Other');
@@ -188,8 +223,8 @@ const App: React.FC = () => {
                 {/* Main Content */}
                 <main className="p-6 max-w-4xl mx-auto">
                     <Routes>
-                        <Route path="/" element={<Dashboard expenses={expenses} currency={settings.currency} categories={settings.categories} />} />
-                        <Route path="/shared" element={<SharedExpenses expenses={expenses} onSettle={handleSettle} onUnsettle={handleUnsettle} currency={settings.currency} />} />
+                        <Route path="/" element={<Dashboard expenses={expenses} currency={settings.currency} categories={settings.categories} onEdit={handleEditExpense} onDelete={handleDeleteExpense} />} />
+                        <Route path="/shared" element={<SharedExpenses expenses={expenses} onSettle={handleSettle} onUnsettle={handleUnsettle} currency={settings.currency} onEdit={handleEditExpense} onDelete={handleDeleteExpense} />} />
                         <Route path="/settings" element={<Settings expenses={expenses} settings={settings} onSaveSettings={setSettings} onUpdateCategory={handleUpdateCategory} />} />
                     </Routes>
                 </main>
@@ -231,13 +266,13 @@ const App: React.FC = () => {
                     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] flex items-end md:items-center justify-center p-0 md:p-4">
                         <div className="bg-white dark:bg-slate-900 w-full md:w-[480px] rounded-t-3xl md:rounded-3xl shadow-2xl overflow-hidden animate-slide-up max-h-[90vh] overflow-y-auto">
                             <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
-                                <h2 className="text-lg font-bold text-slate-800 dark:text-white">New Expense</h2>
+                                <h2 className="text-lg font-bold text-slate-800 dark:text-white">{editingExpense ? 'Edit Expense' : 'New Expense'}</h2>
                                 <button onClick={closeModal} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-500">
                                     <X size={20} />
                                 </button>
                             </div>
 
-                            <form onSubmit={handleAddExpense} className="p-6 space-y-5">
+                            <form onSubmit={handleSaveExpense} className="p-6 space-y-5">
                                 <div className="relative">
                                     <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1 block">Description</label>
                                     <input
@@ -325,7 +360,7 @@ const App: React.FC = () => {
                                     type="submit"
                                     className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-emerald-200 dark:shadow-emerald-900/50 active:scale-[0.98] transition"
                                 >
-                                    Save Expense
+                                    {editingExpense ? 'Update Expense' : 'Save Expense'}
                                 </button>
                             </form>
                         </div>

@@ -48,6 +48,26 @@ export const StorageService = {
     }
   },
 
+  deleteExpense: async (id: string) => {
+    try {
+      const expenses = await StorageService.getExpenses();
+      const updated = expenses.filter(e => e.id !== id);
+      await StorageService.saveExpenses(updated);
+    } catch (e) {
+      console.error('Failed to delete expense', e);
+    }
+  },
+
+  updateExpense: async (updatedExpense: Expense) => {
+    try {
+      const expenses = await StorageService.getExpenses();
+      const updated = expenses.map(e => e.id === updatedExpense.id ? updatedExpense : e);
+      await StorageService.saveExpenses(updated);
+    } catch (e) {
+      console.error('Failed to update expense', e);
+    }
+  },
+
   getSettings: async (): Promise<UserSettings> => {
     try {
       let stored: UserSettings | null = null;

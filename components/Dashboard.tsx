@@ -1,17 +1,19 @@
 import React, { useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { Expense } from '../types';
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, Pencil, Trash2 } from 'lucide-react';
 
 interface DashboardProps {
   expenses: Expense[];
   currency: string;
   categories: string[];
+  onEdit: (expense: Expense) => void;
+  onDelete: (id: string) => void;
 }
 
 const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#64748b', '#06b6d4', '#84cc16'];
 
-const Dashboard: React.FC<DashboardProps> = ({ expenses, currency, categories }) => {
+const Dashboard: React.FC<DashboardProps> = ({ expenses, currency, categories, onEdit, onDelete }) => {
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
 
@@ -44,7 +46,7 @@ const Dashboard: React.FC<DashboardProps> = ({ expenses, currency, categories })
           </p>
         </div>
         <div className="absolute right-0 bottom-0 opacity-10">
-            <TrendingUp size={120} />
+          <TrendingUp size={120} />
         </div>
       </div>
 
@@ -68,15 +70,15 @@ const Dashboard: React.FC<DashboardProps> = ({ expenses, currency, categories })
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} strokeWidth={2} stroke="transparent" />
                   ))}
                 </Pie>
-                <Tooltip 
-                    formatter={(value: number) => [`${currency}${value.toFixed(2)}`, 'Amount']}
-                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', backgroundColor: '#fff' }}
-                    itemStyle={{ color: '#1e293b' }}
+                <Tooltip
+                  formatter={(value: number) => [`${currency}${value.toFixed(2)}`, 'Amount']}
+                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', backgroundColor: '#fff' }}
+                  itemStyle={{ color: '#1e293b' }}
                 />
-                <Legend 
-                  verticalAlign="bottom" 
-                  height={36} 
-                  formatter={(value) => <span className="text-slate-600 dark:text-slate-300 ml-1">{value}</span>} 
+                <Legend
+                  verticalAlign="bottom"
+                  height={36}
+                  formatter={(value) => <span className="text-slate-600 dark:text-slate-300 ml-1">{value}</span>}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -84,7 +86,7 @@ const Dashboard: React.FC<DashboardProps> = ({ expenses, currency, categories })
         </div>
       ) : (
         <div className="text-center py-10 text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-800 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
-            <p>No expenses recorded this month.</p>
+          <p>No expenses recorded this month.</p>
         </div>
       )}
 
@@ -104,8 +106,19 @@ const Dashboard: React.FC<DashboardProps> = ({ expenses, currency, categories })
                   </div>
                 </div>
               </div>
-              <div className="font-bold text-slate-800 dark:text-slate-100">
-                {currency}{expense.amount.toFixed(2)}
+
+              <div className="flex flex-col items-end gap-1">
+                <div className="font-bold text-slate-800 dark:text-slate-100">
+                  {currency}{expense.amount.toFixed(2)}
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => onEdit(expense)} className="text-slate-400 hover:text-blue-500 transition">
+                    <Pencil size={14} />
+                  </button>
+                  <button onClick={() => onDelete(expense.id)} className="text-slate-400 hover:text-red-500 transition">
+                    <Trash2 size={14} />
+                  </button>
+                </div>
               </div>
             </div>
           ))}
