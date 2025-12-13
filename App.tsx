@@ -87,13 +87,20 @@ const App: React.FC = () => {
                 const hasPending = expenses.some(e => e.isShared && !e.isSettled);
                 if (hasPending && Notification.permission === "granted") {
                     try {
-                        const registration = await navigator.serviceWorker.ready;
+                        const swPromise = navigator.serviceWorker.ready;
+                        const timeoutPromise = new Promise((_, reject) =>
+                            setTimeout(() => reject(new Error('SW_TIMEOUT')), 500)
+                        );
+
+                        const registration = await Promise.race([swPromise, timeoutPromise]) as ServiceWorkerRegistration;
+
                         registration.showNotification("SpendWise Reminder", {
                             body: "You have pending shared expenses to settle before the day ends!",
                             icon: "https://cdn-icons-png.flaticon.com/512/5501/5501375.png"
                         });
                     } catch (e) {
-                        // Fallback for non-PWA environments
+                        // Fallback for non-PWA environments or timeouts
+                        console.warn("Notification fallback:", e);
                         new Notification("SpendWise Reminder", {
                             body: "You have pending shared expenses to settle before the day ends!",
                             icon: "https://cdn-icons-png.flaticon.com/512/5501/5501375.png"

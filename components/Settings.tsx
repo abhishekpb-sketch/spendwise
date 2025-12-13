@@ -218,16 +218,31 @@ const Settings: React.FC<SettingsProps> = ({ expenses, settings, onSaveSettings,
 
                             if (Notification.permission === 'granted') {
                                 try {
-                                    const registration = await navigator.serviceWorker.ready;
+                                    // Race condition: wait for SW ready, but timeout after 500ms
+                                    const swPromise = navigator.serviceWorker.ready;
+                                    const timeoutPromise = new Promise((_, reject) =>
+                                        setTimeout(() => reject(new Error('SW_TIMEOUT')), 500)
+                                    );
+
+                                    const registration = await Promise.race([swPromise, timeoutPromise]) as ServiceWorkerRegistration;
+
                                     await registration.showNotification("Test Notification", {
-                                        body: "This is how your SpendWise reminders will look!",
+                                        body: "This is how your SpendWise reminders will look! (Via Service Worker)",
                                         icon: "https://cdn-icons-png.flaticon.com/512/5501/5501375.png"
                                     });
-                                } catch (e) {
+                                } catch (e: any) {
+                                    console.warn("PWA Notification failed, falling back to standard API:", e);
+                                    const isTimeout = e.message === 'SW_TIMEOUT';
+
+                                    // Fallback
                                     new Notification("Test Notification", {
-                                        body: "This is how your SpendWise reminders will look!",
+                                        body: `This is how your SpendWise reminders will look! (Fallback Mode${isTimeout ? ': SW Timeout' : ''})`,
                                         icon: "https://cdn-icons-png.flaticon.com/512/5501/5501375.png"
                                     });
+
+                                    if (isTimeout) {
+                                        alert("Note: Service Worker didn't respond quickly. You might need to reload the app for background notifications to work perfecty.");
+                                    }
                                 }
                             } else {
                                 alert("Please enable notifications for this site first.");
