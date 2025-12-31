@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, NavLink } from 'react-router-dom';
-import { Home, Share2, Settings as SettingsIcon, Plus, X, Loader2, Pencil, Trash2 } from 'lucide-react';
+import { Home, Share2, Settings as SettingsIcon, Plus, X, Loader2 } from 'lucide-react';
 import Dashboard from './components/Dashboard';
 import SharedExpenses from './components/SharedExpenses';
 import Settings from './components/Settings';

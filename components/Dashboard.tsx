@@ -66,7 +66,7 @@ const Dashboard: React.FC<DashboardProps> = ({ expenses, currency, categories, o
                   paddingAngle={5}
                   dataKey="value"
                 >
-                  {chartData.map((entry, index) => (
+                  {chartData.map((_entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} strokeWidth={2} stroke="transparent" />
                   ))}
                 </Pie>
