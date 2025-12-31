@@ -95,29 +95,36 @@ const Dashboard: React.FC<DashboardProps> = ({ expenses, currency, categories, o
         <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-3 px-1">Recent Transactions</h3>
         <div className="space-y-3">
           {expenses.slice(0, 5).map(expense => (
-            <div key={expense.id} className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm flex justify-between items-center">
-              <div className="flex items-center gap-3">
-                <div className={`w-2 h-10 rounded-full ${expense.isShared ? 'bg-blue-500' : 'bg-emerald-500'}`}></div>
-                <div>
-                  <div className="font-semibold text-slate-800 dark:text-slate-100">{expense.description}</div>
-                  <div className="text-xs text-slate-500 dark:text-slate-400">
-                    {new Date(expense.date).toLocaleDateString()} • {expense.category}
-                    {expense.isShared && <span className="ml-2 text-blue-600 dark:text-blue-400 font-medium">(Shared)</span>}
+            <div key={expense.id} className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
+              <div className="flex justify-between items-start">
+                <div className="flex items-center gap-3 flex-1">
+                  <div className={`w-2 h-10 rounded-full ${expense.isShared ? 'bg-blue-500' : 'bg-emerald-500'}`}></div>
+                  <div className="flex-1">
+                    <div className="font-semibold text-slate-800 dark:text-slate-100">{expense.description}</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400">
+                      {new Date(expense.date).toLocaleDateString()} • {expense.category}
+                      {expense.isShared && <span className="ml-2 text-blue-600 dark:text-blue-400 font-medium">(Shared)</span>}
+                    </div>
+                    {(expense.note || expense.sharedNote) && (
+                      <div className="mt-2 text-xs text-slate-600 dark:text-slate-400 italic">
+                        {expense.note || expense.sharedNote}
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
 
-              <div className="flex flex-col items-end gap-1">
-                <div className="font-bold text-slate-800 dark:text-slate-100">
-                  {currency}{expense.amount.toFixed(2)}
-                </div>
-                <div className="flex gap-2">
-                  <button onClick={() => onEdit(expense)} className="text-slate-400 hover:text-blue-500 transition">
-                    <Pencil size={14} />
-                  </button>
-                  <button onClick={() => onDelete(expense.id)} className="text-slate-400 hover:text-red-500 transition">
-                    <Trash2 size={14} />
-                  </button>
+                <div className="flex flex-col items-end gap-1 ml-4">
+                  <div className="font-bold text-slate-800 dark:text-slate-100">
+                    {currency}{expense.amount.toFixed(2)}
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => onEdit(expense)} className="text-slate-400 hover:text-blue-500 transition">
+                      <Pencil size={14} />
+                    </button>
+                    <button onClick={() => onDelete(expense.id)} className="text-slate-400 hover:text-red-500 transition">
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

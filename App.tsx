@@ -26,6 +26,7 @@ const App: React.FC = () => {
     const [category, setCategory] = useState<string>(DEFAULT_CATEGORIES[0]);
     const [isShared, setIsShared] = useState(false);
     const [sharedNote, setSharedNote] = useState('');
+    const [note, setNote] = useState('');
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
 
     // Initial Data Load
@@ -129,6 +130,7 @@ const App: React.FC = () => {
                 date: new Date(date).toISOString(),
                 isShared,
                 sharedNote: isShared ? sharedNote : undefined,
+                note: note || undefined,
             };
 
             await StorageService.updateExpense(updatedExpense);
@@ -142,6 +144,7 @@ const App: React.FC = () => {
                 date: new Date(date).toISOString(),
                 isShared,
                 sharedNote: isShared ? sharedNote : undefined,
+                note: note || undefined,
                 isSettled: false,
                 createdAt: Date.now()
             };
@@ -157,6 +160,7 @@ const App: React.FC = () => {
         setCategory(expense.category);
         setIsShared(expense.isShared);
         setSharedNote(expense.sharedNote || '');
+        setNote(expense.note || expense.sharedNote || ''); // Support both note and sharedNote for backward compatibility
         setDate(new Date(expense.date).toISOString().split('T')[0]);
         setIsAddModalOpen(true);
     };
@@ -188,6 +192,7 @@ const App: React.FC = () => {
         setCategory(settings.categories[0] || 'Other');
         setIsShared(false);
         setSharedNote('');
+        setNote('');
         setDate(new Date().toISOString().split('T')[0]);
     };
 
@@ -334,6 +339,17 @@ const App: React.FC = () => {
                                         value={date}
                                         onChange={(e) => setDate(e.target.value)}
                                         className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500 transition dark:text-white"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1 block">Note (Optional)</label>
+                                    <textarea
+                                        value={note}
+                                        onChange={(e) => setNote(e.target.value)}
+                                        placeholder="Add any additional notes about this expense..."
+                                        className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500 transition dark:text-white resize-none"
+                                        rows={3}
                                     />
                                 </div>
 

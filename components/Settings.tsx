@@ -32,14 +32,14 @@ const Settings: React.FC<SettingsProps> = ({ expenses, settings, onSaveSettings,
         }
 
         const csvContent = [
-            ['Date', 'Category', 'Description', 'Amount', 'Shared', 'Shared Note', 'Settled'],
+            ['Date', 'Category', 'Description', 'Amount', 'Shared', 'Note', 'Settled'],
             ...filtered.map(e => [
                 new Date(e.date).toLocaleDateString(),
                 e.category,
                 `"${e.description.replace(/"/g, '""')}"`,
                 e.amount.toFixed(2),
                 e.isShared ? 'Yes' : 'No',
-                e.sharedNote ? `"${e.sharedNote.replace(/"/g, '""')}"` : '',
+                (e.note || e.sharedNote) ? `"${(e.note || e.sharedNote).replace(/"/g, '""')}"` : '',
                 e.isSettled ? 'Yes' : 'No'
             ])
         ].map(e => e.join(',')).join('\n');

@@ -130,10 +130,10 @@ const SharedExpenses: React.FC<SharedExpensesProps> = ({ expenses, onSettle, onU
                 </div>
               </div>
 
-              {expense.sharedNote && (
+              {(expense.note || expense.sharedNote) && (
                 <div className="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-lg flex gap-2 items-start text-sm text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-slate-700/50">
                   <StickyNote size={16} className="mt-0.5 text-slate-400 shrink-0" />
-                  <p>{expense.sharedNote}</p>
+                  <p>{expense.note || expense.sharedNote}</p>
                 </div>
               )}
             </div>

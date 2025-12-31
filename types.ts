@@ -7,7 +7,8 @@ export interface Expense {
   description: string;
   date: string; // ISO String
   isShared: boolean;
-  sharedNote?: string;
+  sharedNote?: string; // Deprecated: kept for backward compatibility
+  note?: string; // Note field available for all expenses
   isSettled: boolean;
   createdAt: number;
 }
